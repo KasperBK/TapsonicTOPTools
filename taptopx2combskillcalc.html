@@ -32,7 +32,7 @@
 						*/
 	</script>
 	<center>	
-		<h2>Tapsonic TOP x2 Combo Calculator v1</h2>
+		<h2>Tapsonic TOP x2 Combo Calculator v1.1</h2>
 		<h5>by KasperBK</h5>
 	</center>
 </head>
@@ -44,6 +44,17 @@
 	    <th>Star 2</th>
 	    <th colspan="2" ><div id="starlist2"></div><br><div id="starlist2detail"></div></th>
 	  </tr>
+	  <!-- new 04/20/20-->
+	  <tr>
+		  <td colspan = "6">
+			<br />
+			<center>
+				Custom Time <input type="number" style="width:80px;text-align:center;" min=0 max=180 step=1 id="customTime"  value=0> Seconds <br />
+			</center>
+			<br />
+		  </td>
+	  </tr>
+	  <!-- end of new -->
 	  <tr>
 	  	<td></td>
 	  	<td>Cool Down</td>
@@ -68,11 +79,11 @@
 var ave_per = new Array(100);
 var combo_time = new Array(100);
 for (var i = 0; i < combo_time.length; i++) {
-  combo_time[i] = new Array(4);
+  combo_time[i] = new Array(5);
 }
 var combo_time_per = new Array(100);
 for (var i = 0; i < combo_time_per.length; i++) {
-  combo_time_per[i] = new Array(4);
+  combo_time_per[i] = new Array(5);
 }
 
 	function genTable(){
@@ -82,8 +93,8 @@ for (var i = 0; i < combo_time_per.length; i++) {
 
 		//loop for body
 		for (i = 1; i <= 10; i++) {
-		  table_b += "<tr><td>LV" + i + "</td><td><input type='number' min='1' step='1' id='star1cd" + i + "' readonly>seconds</td><td><input type='number' min='1' step='1' id='star1st" + i + "' readonly>seconds</td>" +
-		  			"<td>LV" + i + "</td><td><input type='number' min='1' step='1' id='star2cd" + i + "' readonly>seconds</td><td><input type='number' min='1' step='1' id='star2st" + i + "' readonly>seconds</td></tr>";
+		  table_b += "<tr><td>LV" + i + "</td><td><input type='number' min='1' step='1' id='star1cd" + i + "' readonly> Seconds</td><td><input type='number' min='1' step='1' id='star1st" + i + "' readonly> Seconds</td>" +
+		  			"<td>LV" + i + "</td><td><input type='number' min='1' step='1' id='star2cd" + i + "' readonly> Seconds</td><td><input type='number' min='1' step='1' id='star2st" + i + "' readonly> Seconds</td></tr>";
 		}
 		
 		var skilltable = document.getElementById('skilltable');
@@ -183,8 +194,16 @@ for (var i = 0; i < combo_time_per.length; i++) {
 
 
 	function calculate(){
-		
-		
+		//new 04/20/2020
+		if(parseInt(document.getElementById('customTime').value) < 0 || parseInt(document.getElementById('customTime').value) > 180){
+			alert("Please enter a custom time within 0-180 seconds");
+			return;
+		}
+		else{
+			custom_time = parseInt(document.getElementById('customTime').value);
+		}
+		//end of new		
+
 		var combo_time_pointer = 0;
 		
 		
@@ -273,6 +292,10 @@ for (var i = 0; i < combo_time_per.length; i++) {
 						combo_time[combo_time_pointer][3] = combo_s;
 						combo_time_per[combo_time_pointer][3] = combo_s/180;
 					}
+					if(ind == (custom_time - 1)){
+						combo_time[combo_time_pointer][4] = combo_s;
+						combo_time_per[combo_time_pointer][4] = combo_s/(custom_time-1);
+					}
 				}
 
 				ave_per[combo_time_pointer] = ((combo_time_per[combo_time_pointer][0]+ combo_time_per[combo_time_pointer][1] +combo_time_per[combo_time_pointer][2] + combo_time_per[combo_time_pointer][3]) /4);
@@ -297,6 +320,7 @@ for (var i = 0; i < combo_time_per.length; i++) {
 		var type2 = star_data[document.getElementById('star_name2').value][21];
 		var color1 = "";
 		var color2 = "";
+		var custom_time = parseInt(document.getElementById('customTime').value);
 
 		if(type1 == "Dancer"){
 				color1 = "red";
@@ -321,15 +345,45 @@ for (var i = 0; i < combo_time_per.length; i++) {
 		//overall
 		for(r=0;r < 100; r++){
 			per_temp = ave_per[r];
-			if(per_temp > highest){
+			if(per_temp >= highest){
 				highest = per_temp;
 				index = r;
 			}
 		}
 
-		highest = (highest*100).toFixed(2)
+		highest = (highest*100).toFixed(2);
 		star1_level = (Math.floor(index / 10) ) + 1 ;
 		star2_level = (index % 10) + 1;
+		//print results
+		results = "<p>The best possible combination is <b><font color='" + color1 +"'>" + star1_name +  "</font></b> Skill Level <b>" + star1_level + "</b> and <b><font color='" + color2 + "'>" + star2_name + "</font></b> Skill Level <b>" + star2_level + "</b> with an average percentage of <b><i>" + highest + "%</b></i></p><br />";	
+		results += "<table border = '1'><tr><th>90 Seconds</th><th>120 Seconds</th><th>150 Seconds</th><th>180 Seconds</th></tr>" +
+		"<tr><td>" + combo_time[index][0] + " Seconds</td><td>" + combo_time[index][1] + " Seconds</td><td>" + combo_time[index][2] + " Seconds</td><td>" + combo_time[index][3] + " Seconds</td></tr>"+
+		"<tr><td>" + (combo_time_per[index][0]*100).toFixed(2) + "%</td><td>" + (combo_time_per[index][1]*100).toFixed(2) + "%</td><td>" + (combo_time_per[index][2]*100).toFixed(2) + "%</td><td>" + (combo_time_per[index][3]*100).toFixed(2) + " %</td> </tr>" +
+		"</table>";
+
+
+		//new 04/20/2020
+		//overall(custom)
+		if(custom_time > 0 && custom_time <= 180){
+			highest = 0;
+			for(r=0;r < 100; r++){
+				per_temp = combo_time_per[r][4];
+				if(per_temp >= highest){
+					highest = per_temp;
+					index = r;
+				}
+			}
+
+			highest = (highest*100).toFixed(2);
+			star1_level = (Math.floor(index / 10) ) + 1 ;
+			star2_level = (index % 10) + 1;
+			results += "<p>The best possible combination (in <b>" + custom_time + "</b> seconds) is <b><font color='" + color1 +"'>" + star1_name +  "</font></b> Skill Level <b>" + star1_level + "</b> and <b><font color='" + color2 + "'>" + star2_name + "</font></b> Skill Level <b>" + star2_level + "</b> with an average percentage of <b><i>" + highest + "%</b></i></p><br />";	
+			results += "<table border = '1'><tr><th>" + custom_time + " Seconds</th></tr>" +
+			"<tr><td>" + combo_time[index][4] + " Seconds</td></tr>"+
+			"<tr><td>" + (combo_time_per[index][4]*100).toFixed(2) + "%</td></tr>" +
+			"</table>";
+		}
+		//end of new 
 
 
 		//for star 1 each level
@@ -340,7 +394,7 @@ for (var i = 0; i < combo_time_per.length; i++) {
 			s1_index = 0;
 			for(s = 0; s < 10; s++){
 				per_temp = ave_per[s+s1];
-				if(per_temp > s1_highest){
+				if(per_temp >= s1_highest){
 					s1_highest = per_temp;
 					s1_index = s+s1;
 				}
@@ -369,7 +423,7 @@ for (var i = 0; i < combo_time_per.length; i++) {
 			s2_index = 0;
 			for(s = 0; s < 100; s++){
 				per_temp = ave_per[s+s2];
-				if(per_temp > s2_highest){
+				if(per_temp >= s2_highest){
 					s2_highest = per_temp;
 					s2_index = s + s2;
 				}
@@ -393,16 +447,7 @@ for (var i = 0; i < combo_time_per.length; i++) {
 
 
 
-		//print results
-
-
-
-		results = "<p>The best possible combination is <b><font color='" + color1 +"'>" + star1_name +  "</font></b> Skill Level <b>" + star1_level + "</b> and <b><font color='" + color2 + "'>" + star2_name + "</font></b> Skill Level <b>" + star2_level + "</b> with an average percentage of <b><i>" + highest + "%</b></i></p><br />";	
-
-		results += "<table border = '1'><tr><th>90 Seconds</th><th>120 Seconds</th><th>150 Seconds</th><th>180 Seconds</th></tr>" +
-		"<tr><td>" + combo_time[index][0] + " Seconds</td><td>" + combo_time[index][1] + " Seconds</td><td>" + combo_time[index][2] + " Seconds</td><td>" + combo_time[index][3] + " Seconds</td></tr>"+
-		"<tr><td>" + (combo_time_per[index][0]*100).toFixed(2) + "%</td><td>" + (combo_time_per[index][1]*100).toFixed(2) + "%</td><td>" + (combo_time_per[index][2]*100).toFixed(2) + "%</td><td>" + (combo_time_per[index][3]*100).toFixed(2) + " %</td> </tr>" +
-		"</table>";
+	
 
 		var result_div = document.getElementById('bestResult');
 		result_div.innerHTML = "";
@@ -410,6 +455,77 @@ for (var i = 0; i < combo_time_per.length; i++) {
 
 		result_div.innerHTML += "<br><br><h3>Best Pair per Each Level</h3><table width='100%'><tr><td>" + s1_table + "</td><td>" + s2_table + "</td></table>";
 	
+
+
+		//new 04/20/2020 custom
+		//for star 1 each level (custom)
+		if(custom_time > 0 && custom_time <= 180){
+			s1 = 0;
+			s1_table = "<center><table border='1' width = '50%'><tr><th><font color = '" + color1 + "'>" + star1_name + "</font></th><th><font color = '" + color2 + "'>" + star2_name + "</font></th><th>" + custom_time + " Seconds</th><th>AVE%</th></tr>";
+			while(s1 < 100){
+				s1_highest = 0;
+				s1_index = 0;
+				for(s = 0; s < 10; s++){
+					per_temp = combo_time_per[s+s1][4];
+					if(per_temp >= s1_highest){
+						s1_highest = per_temp;
+						s1_index = s+s1;
+					}
+				}
+				//alert(s1 + "/" + s1_index);
+
+				s1_level = (Math.floor(s1 / 10) ) + 1;
+				s12_level = (s1_index % 10) + 1;
+
+				s1_table += "<tr><td rowspan='2'><b>LV"+ s1_level +"</b></td><td rowspan='2'><b>LV" + s12_level + "</b></td><td>" + combo_time[s1_index][4] + " Seconds</td><td rowspan='2'><b><i>" + (combo_time_per[s1_index][4]*100).toFixed(2) + "%</b></i></td></tr>";
+
+				s1_table += "<tr><td>" + (combo_time_per[s1_index][4]*100).toFixed(2) + "%</td></tr>";
+
+				s1 = s1 + 10;
+
+			}
+
+			s1_table += "</table></center>";
+
+			//for star 2 each level (custom)
+			s2 = 0;
+			s2_table = "<center><table border='1' width = '50%'><tr><th><font color = '" + color2 + "'>" + star2_name + "</font></th><th><font color = '" + color1 + "'>" + star1_name + "</font></th><th>" + custom_time + " Seconds</th><th>AVE%</th></tr>";
+			
+			while(s2 < 10){
+				s2_highest = 0;
+				s2_index = 0;
+				for(s = 0; s < 100; s++){
+					per_temp = combo_time_per[s+s2][4];
+					if(per_temp >= s2_highest){
+						s2_highest = per_temp;
+						s2_index = s + s2;
+					}
+					s = s + 9;
+				}
+				//alert(s1 + "/" + s1_index);
+
+				s21_level = (Math.floor(s2_index / 10) ) + 1;
+				s2_level = s2 + 1;
+
+				s2_table += "<tr><td rowspan='2'><b>LV"+ s2_level +"</b></td><td rowspan='2'><b>LV" + s21_level + "</b></td><td>" + combo_time[s2_index][4] + " Seconds</td><td rowspan='2'><b><i>" + (combo_time_per[s2_index][4]*100).toFixed(2) + "%</b></i></td></tr>";
+
+				s2_table += "<tr><td>" + (combo_time_per[s2_index][4]*100).toFixed(2) + "%</td></tr>";
+
+				s2 = s2 + 1;
+
+			}
+
+			s2_table += "</table></center>";
+
+
+			result_div.innerHTML += "<br><br><h3>Best Pair per Each Level (" + custom_time + " seconds)</h3><table width='100%'><tr><td>" + s1_table + "</td><td>" + s2_table + "</td></table>";
+	
+
+		}
+		//end of new
+
+
+
 
 		//all results
 		//for star 1 each level
@@ -431,6 +547,8 @@ for (var i = 0; i < combo_time_per.length; i++) {
 		}
 
 		s1_table += "</table></center>";
+
+
 
 		result_div.innerHTML += "<br><br><h3>All Results</h3>" + s1_table;
 	}
